@@ -89,18 +89,37 @@ class SectorRelayChart:
                 result_df = df.iloc[:, [0, 1]].copy()
                 result_df.columns = ['板块名称', '涨跌幅']
             
+            # 验证数据有效性
+            if result_df.empty:
+                raise ValueError("获取的数据为空")
+            
+            # 检查涨跌幅列是否有效
+            if '涨跌幅' not in result_df.columns:
+                raise ValueError("数据中缺少'涨跌幅'列")
+            
             # 按涨跌幅降序排序
             result_df = result_df.sort_values('涨跌幅', ascending=False)
+            
+            # 验证涨跌幅数据是否合理（应该在-20%到20%之间，超出范围可能是数据错误）
+            invalid_data = result_df[(result_df['涨跌幅'] < -20) | (result_df['涨跌幅'] > 20)]
+            if not invalid_data.empty:
+                print(f"⚠️  警告：发现异常涨跌幅数据 {len(invalid_data)} 条，已过滤")
+                result_df = result_df[(result_df['涨跌幅'] >= -20) & (result_df['涨跌幅'] <= 20)]
             
             # 取前N个
             result_df = result_df.head(self.top_n).reset_index(drop=True)
             
-            print(f"成功获取 {len(result_df)} 个板块数据")
+            if result_df.empty:
+                raise ValueError("过滤后数据为空，无法继续")
+            
+            # 显示前3名板块信息，确认数据真实性
+            print(f"✓ 成功获取 {len(result_df)} 个真实板块数据")
+            print(f"   前3名：{', '.join(result_df.head(3)['板块名称'].tolist())}")
             return result_df
             
         except Exception as e:
-            print(f"获取数据失败: {e}")
-            print("尝试使用备用方法...")
+            print(f"❌ 获取行业板块数据失败: {e}")
+            print("尝试使用备用方法（概念板块数据）...")
             # 备用方法：使用股票概念板块数据
             try:
                 df = ak.stock_board_concept_name_em()
@@ -109,32 +128,21 @@ class SectorRelayChart:
                     result_df.columns = ['板块名称', '涨跌幅']
                     result_df = result_df.sort_values('涨跌幅', ascending=False)
                     result_df = result_df.head(self.top_n).reset_index(drop=True)
+                    print(f"✓ 使用概念板块数据，成功获取 {len(result_df)} 个板块")
                     return result_df
-            except:
-                pass
-            
-            # 如果都失败了，返回示例数据用于测试
-            print("使用示例数据...")
-            return self._get_sample_data()
+                else:
+                    raise ValueError("概念板块数据格式不正确")
+            except Exception as e2:
+                print(f"❌ 备用方法也失败: {e2}")
+                raise Exception(
+                    "无法获取真实板块数据！\n"
+                    "可能的原因：\n"
+                    "1. 网络连接问题，请检查网络\n"
+                    "2. 数据源暂时不可用，请稍后重试\n"
+                    "3. akshare库需要更新：pip install --upgrade akshare\n\n"
+                    "程序已停止，不会使用虚假数据。"
+                )
     
-    def _get_sample_data(self):
-        """生成示例数据用于测试"""
-        import random
-        sectors = [
-            "有色金属", "化工", "新能源", "半导体", "医药生物",
-            "食品饮料", "电子", "计算机", "通信", "机械设备",
-            "汽车", "房地产", "银行", "非银金融", "建筑装饰",
-            "钢铁", "煤炭", "石油石化", "电力", "公用事业",
-            "交通运输", "商贸零售", "纺织服装", "轻工制造", "传媒",
-            "综合", "农林牧渔", "国防军工", "环保", "建筑材料"
-        ]
-        data = {
-            '板块名称': sectors[:self.top_n],
-            '涨跌幅': [round(random.uniform(-5, 10), 2) for _ in range(self.top_n)]
-        }
-        df = pd.DataFrame(data)
-        df = df.sort_values('涨跌幅', ascending=False).reset_index(drop=True)
-        return df
     
     def get_sector_color(self, sector_name):
         """
