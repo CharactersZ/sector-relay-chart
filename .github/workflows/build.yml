@@ -26,11 +26,24 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pyinstaller
+      continue-on-error: false
         
     - name: 打包exe
       shell: cmd
       run: |
-        pyinstaller --name="赛道接力图生成器" --onefile --console --hidden-import=akshare --hidden-import=pandas --hidden-import=openpyxl --hidden-import=numpy --collect-all akshare --collect-all pandas sector_relay_chart.py
+        pyinstaller --name="SectorRelayChart" --onefile --console --hidden-import=akshare --hidden-import=pandas --hidden-import=openpyxl --hidden-import=numpy --collect-all akshare --collect-all pandas sector_relay_chart.py
+            
+    - name: 检查并重命名
+      shell: cmd
+      run: |
+        dir dist
+        if exist "dist\SectorRelayChart.exe" (
+          move "dist\SectorRelayChart.exe" "dist\赛道接力图生成器.exe"
+          echo File renamed successfully
+        ) else (
+          echo Error: SectorRelayChart.exe not found
+          exit /b 1
+        )
             
     - name: 上传构建产物
       uses: actions/upload-artifact@v3
@@ -38,3 +51,4 @@ jobs:
         name: 赛道接力图生成器-exe
         path: dist/赛道接力图生成器.exe
         retention-days: 30
+        if-no-files-found: error
