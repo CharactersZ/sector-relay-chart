@@ -28,17 +28,9 @@ jobs:
         pip install pyinstaller
         
     - name: 打包exe
+      shell: cmd
       run: |
-        pyinstaller --name="赛道接力图生成器" ^
-            --onefile ^
-            --console ^
-            --hidden-import=akshare ^
-            --hidden-import=pandas ^
-            --hidden-import=openpyxl ^
-            --hidden-import=numpy ^
-            --collect-all akshare ^
-            --collect-all pandas ^
-            sector_relay_chart.py
+        pyinstaller --name="赛道接力图生成器" --onefile --console --hidden-import=akshare --hidden-import=pandas --hidden-import=openpyxl --hidden-import=numpy --collect-all akshare --collect-all pandas sector_relay_chart.py
             
     - name: 上传构建产物
       uses: actions/upload-artifact@v3
