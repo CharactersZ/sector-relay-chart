@@ -17,21 +17,23 @@
    - **不要**勾选 "Add a README file"（我们已经有文件了）
 3. 点击 **Create repository**
 
-### 第二步：在本地初始化Git并推送代码
+### 第二步：连接GitHub并推送代码
 
-在终端执行以下命令（我已经为你准备好了，直接复制运行）：
+**方法一：使用自动化脚本（推荐）**
+
+在终端运行：
 
 ```bash
 cd /Users/ttzach/Documents/code
+./连接到GitHub.sh
+```
 
-# 初始化git仓库
-git init
+脚本会引导你输入GitHub用户名和仓库名，然后自动连接并推送代码。
 
-# 添加所有文件
-git add .
+**方法二：手动操作**
 
-# 提交代码
-git commit -m "初始提交：赛道接力图生成器"
+```bash
+cd /Users/ttzach/Documents/code
 
 # 添加GitHub远程仓库（替换YOUR_USERNAME为你的GitHub用户名）
 git remote add origin https://github.com/YOUR_USERNAME/sector-relay-chart.git
@@ -41,7 +43,11 @@ git branch -M main
 git push -u origin main
 ```
 
-**重要**：记得把 `YOUR_USERNAME` 替换成你的GitHub用户名！
+**注意**：GitHub现在要求使用Personal Access Token而不是密码。如果提示输入密码，请：
+1. 访问：https://github.com/settings/tokens
+2. 点击 "Generate new token (classic)"
+3. 勾选 `repo` 权限
+4. 生成后复制token，推送时用token代替密码
 
 ### 第三步：在GitHub上触发打包
 
