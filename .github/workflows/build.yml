@@ -2,6 +2,8 @@ name: Build Windows EXE
 
 on:
   push:
+    branches:
+      - main  # 推送到main分支时也触发
     tags:
       - 'v*'  # 当推送以v开头的tag时触发
   workflow_dispatch:  # 允许手动触发
